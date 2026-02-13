@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChatterGuild.Console/ChatterGuild.Console.csproj" />
+    <Project Path="src/ChatterGuild.Core/ChatterGuild.Core.csproj" />
+  </Folder>
+</Solution>
