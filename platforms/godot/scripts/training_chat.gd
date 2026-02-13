@@ -21,12 +21,11 @@ var player_role := ScoringEngine.RoleType.INITIATOR
 var ai_role := ScoringEngine.RoleType.LISTENER
 
 func _ready() -> void:
-	randomize()
 	profile = SaveLoad.load_or_create()
 	report = SessionReport.new()
 
-	var class_name := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
-	header.text = "Level %d • Class: %s" % [profile.level, class_name]
+	var archetype_class := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
+	header.text = "Level %d • Class: %s" % [profile.level, archetype_class]
 	footer.text = "Training Mode"
 
 	_add_system("Training Mode: have a conversation. End anytime to see your report.")
@@ -66,7 +65,7 @@ func _on_end() -> void:
 	profile.blend_archetype(v["i"], v["l"], v["c"], v["s"], v["e"], 0.15)
 	SaveLoad.save(profile)
 
-	var cache := get_node("/root/SessionCache") as SessionCache
+	var cache := get_node("/root/SessionCache")
 	cache.last_report = report
 
 	get_tree().change_scene_to_file("res://scenes/report.tscn")

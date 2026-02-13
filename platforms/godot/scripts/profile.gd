@@ -45,7 +45,11 @@ func blend_archetype(i: float, l: float, c: float, s: float, e: float, alpha: fl
 func _normalize_archetype() -> void:
 	var sum := initiator + listener + challenger + synthesizer + explorer
 	if sum <= 0.0001:
-		initiator = listener = challenger = synthesizer = explorer = 0.2
+		initiator = 0.2
+		listener = 0.2
+		challenger = 0.2
+		synthesizer = 0.2
+		explorer = 0.2
 		return
 	initiator /= sum
 	listener /= sum

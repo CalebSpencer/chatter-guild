@@ -37,7 +37,11 @@ func add_turn(speaker: String, text: String, role: int, r) -> void:
 	turns.append(t)
 
 	total_ip += r.ip
-	sumI += r.I; sumL += r.L; sumC += r.C; sumS += r.S; sumE += r.E
+	sumI += r.I
+	sumL += r.L
+	sumC += r.C
+	sumS += r.S
+	sumE += r.E
 
 func archetype_vector() -> Dictionary:
 	var sum := sumI + sumL + sumC + sumS + sumE

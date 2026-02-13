@@ -15,7 +15,7 @@ static func extract(msg: String, partner_last: String, recent_tokens: Dictionary
 	var partner_asked := pl.find("?") >= 0
 	var i_asked := m.find("?") >= 0
 
-	var iq := i_asked ? 1 : 0
+	var iq := 1 if i_asked else 0
 
 	var rf := 0
 	if m.begins_with("so ") or m.find("it sounds like") >= 0 or m.find("in other words") >= 0 or m.find("to summarize") >= 0:
@@ -95,12 +95,12 @@ static func _novel_token_count(m: String, recent: Dictionary) -> int:
 
 static func _clean_token(s: String) -> String:
 	var t := s.strip_edges()
-	while t.length() > 0 and not t[0].is_valid_int() and not t[0].is_valid_float() and not t[0].is_subsequence_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):
+	var punct := ".,!?;:\"'()[]{}<>"
+	while t.length() > 0 and punct.find(t[0]) >= 0:
 		t = t.substr(1)
-	while t.length() > 0 and not t[t.length()-1].is_valid_int() and not t[t.length()-1].is_valid_float() and not t[t.length()-1].is_subsequence_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):
-		t = t.substr(0, t.length()-1)
-	# above is a bit hacky; simplest: strip common punctuation
-	return t.strip_edges(".,!?;:\"'()[]{}<>")
+	while t.length() > 0 and punct.find(t[t.length() - 1]) >= 0:
+		t = t.substr(0, t.length() - 1)
+	return t
 
 static func _clamp02(v: int) -> int:
 	return clamp(v, 0, 2)

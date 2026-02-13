@@ -5,7 +5,7 @@ extends Node
 static var topics := ["movies","music","work","burnout","kids","gaming","habits","goals","friendship","travel"]
 
 static func reply(ai_role: int, player_last: String) -> String:
-	var topic := topics[randi() % topics.size()]
+	var topic: String = topics[randi() % topics.size()]
 	var asked := player_last.find("?") >= 0
 
 	match ai_role:
