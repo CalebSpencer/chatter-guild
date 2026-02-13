@@ -3,3 +3,6 @@ obj/
 
 # Godot
 .godot/
+
+# LLM config (contains API keys)
+llm_config.json

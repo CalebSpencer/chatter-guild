@@ -1,14 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using ChatterGuild.Core;
 
 public static class Program
 {
-    static void Main()
+    static async Task Main()
     {
         Console.WriteLine("=== Conversation Lab (Console Training MVP) ===");
         var profile = SaveLoad.LoadOrCreate();
         var rng = new Random();
+
+        using var llm = LlmConnector.TryCreate();
+        bool useLlm = llm != null;
+        if (useLlm)
+            Console.WriteLine($"LLM mode: active ({llm.ProviderLabel})");
+        else
+            Console.WriteLine("LLM mode: off (using local AI responder)");
 
         Console.WriteLine($"Loaded Profile: Level {profile.Level}, TotalXP {profile.TotalXP}");
         Console.WriteLine($"Current Class: {Archetypes.GetClassName(profile.Initiator, profile.Listener, profile.Challenger, profile.Synthesizer, profile.Explorer)}");
@@ -37,6 +45,7 @@ public static class Program
 
         var report = new SessionReport();
         var recentTokens = new HashSet<string>();
+        var history = new List<(string role, string content)>();
 
         string lastYou = "";
         string lastPartner = "";
@@ -64,11 +73,28 @@ public static class Program
                 partner = Console.ReadLine() ?? "";
                 if (partner.Trim().Equals("end", StringComparison.OrdinalIgnoreCase)) break;
             }
+            else if (useLlm)
+            {
+                Console.Write("Partner (thinking...): ");
+                partner = await llm.RequestReplyAsync(partnerRole, lastYou, history);
+                if (partner == null)
+                {
+                    partner = AIResponder.Reply(partnerRole, lastYou, rng);
+                    Console.WriteLine($"[fallback] {partner}");
+                }
+                else
+                {
+                    Console.WriteLine(partner);
+                }
+            }
             else
             {
                 partner = AIResponder.Reply(partnerRole, lastYou, rng);
                 Console.WriteLine($"Partner: {partner}");
             }
+
+            history.Add(("user", you));
+            history.Add(("assistant", partner));
 
             var rP = ScoringEngine.ScoreTurn(partnerRole, partner, lastYou, recentTokens);
             report.Add("Partner", partner, partnerRole, rP);
