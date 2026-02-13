@@ -1,0 +1,21 @@
+Assets/
+  Scripts/
+    Core/
+      PlayerProfile.cs
+      SaveLoad.cs
+      Archetypes.cs
+    Chat/
+      ChatUI.cs
+      TrainingChatController.cs
+      AIResponder.cs
+    Scoring/
+      BehaviorHeuristics.cs
+      ScoringEngine.cs
+      SessionReport.cs
+  Prefabs/
+    ChatMessage.prefab
+  Scenes/
+    BootScene.unity
+    MenuScene.unity
+    TrainingChatScene.unity
+    ReportScene.unity
