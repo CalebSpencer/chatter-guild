@@ -1,0 +1,16 @@
+res://
+  scenes/
+    menu.tscn
+    training_chat.tscn
+    report.tscn
+  scripts/
+    profile.gd
+    save_load.gd
+    archetypes.gd
+    behavior_heuristics.gd
+    scoring_engine.gd
+    ai_responder.gd
+    session_report.gd
+    session_cache.gd
+    training_chat.gd
+    report.gd
