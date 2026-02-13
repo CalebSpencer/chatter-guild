@@ -8,8 +8,8 @@ extends Control
 func _ready() -> void:
 	back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/menu.tscn"))
 
-	var cache := get_node("/root/SessionCache") as SessionCache
-	var report := cache.last_report
+	var cache := get_node("/root/SessionCache")
+	var report: Variant = cache.last_report
 	var profile := SaveLoad.load_or_create()
 
 	if report == null:
@@ -17,14 +17,14 @@ func _ready() -> void:
 		body.text = ""
 		return
 
-	var v := report.archetype_vector()
-	var class_name := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
+	var v: Dictionary = report.archetype_vector()
+	var archetype_class := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
 
 	title.text = "Session Report • +%d IP" % report.total_ip
 
 	body.text = ""
 	body.append_text("Level: %d\n" % profile.level)
-	body.append_text("Class: %s\n\n" % class_name)
+	body.append_text("Class: %s\n\n" % archetype_class)
 	body.append_text("Archetype Evidence (this session):\n")
 	body.append_text("Initiator:   %.2f\n" % v["i"])
 	body.append_text("Listener:    %.2f\n" % v["l"])

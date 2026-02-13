@@ -5,7 +5,7 @@ extends Node
 enum RoleType { INITIATOR, LISTENER, CHALLENGER, SYNTHESIZER, EXPLORER }
 
 class ScoringResult:
-	var b
+	var b: Variant
 	var raw: int
 	var norm: float
 	var ip: int
@@ -33,32 +33,32 @@ static func _weights(role: int) -> Array:
 		_: return [1,1,1,1]
 
 static func score_turn(role: int, msg: String, partner_last: String, recent_tokens: Dictionary) -> ScoringResult:
-	var b = BehaviorHeuristics.extract(msg, partner_last, recent_tokens)
-	var w := _weights(role)
+	var b: Variant = BehaviorHeuristics.extract(msg, partner_last, recent_tokens)
+	var w: Array = _weights(role)
 
-	var raw := b.oc * w[0] + b.inn * w[1] + b.iq * w[2] + b.rf * w[3]
+	var raw: int = b.oc * w[0] + b.inn * w[1] + b.iq * w[2] + b.rf * w[3]
 
 	_count[role] += 1
 	_sum_raw[role] += raw
 
-	var expected := float(_sum_raw[role]) / max(1, _count[role])
+	var expected: float = float(_sum_raw[role]) / max(1, _count[role])
 	expected = max(1.0, expected)
 
-	var norm := clamp(float(raw) / expected, 0.0, 2.5)
+	var norm: float = clamp(float(raw) / expected, 0.0, 2.5)
 
-	var clarity := int(round(3.0 * (b.oc + b.iq)))
-	var integration := int(round(4.0 * b.inn))
-	var depth := int(round(4.0 * b.rf))
-	var adaptability := int(round(3.0 * (b.inn + b.iq))) # placeholder
+	var clarity: int = int(round(3.0 * (b.oc + b.iq)))
+	var integration: int = int(round(4.0 * b.inn))
+	var depth: int = int(round(4.0 * b.rf))
+	var adaptability: int = int(round(3.0 * (b.inn + b.iq))) # placeholder
 
-	var ip := clamp(int(round(10.0 * norm)), 0, 30)
+	var ip: int = clamp(int(round(10.0 * norm)), 0, 30)
 
 	# archetype evidence
-	var I := (role == RoleType.INITIATOR ? 1.0 : 0.0) + 0.5 * b.oc + 0.25 * b.iq
-	var L := (role == RoleType.LISTENER ? 1.0 : 0.0) + 0.6 * b.inn + 0.4 * b.rf
-	var C := (role == RoleType.CHALLENGER ? 1.0 : 0.0) + 0.6 * b.iq + 0.2 * b.oc
-	var S := (role == RoleType.SYNTHESIZER ? 1.0 : 0.0) + 0.7 * b.rf + 0.4 * b.inn
-	var E := (role == RoleType.EXPLORER ? 1.0 : 0.0) + 0.7 * b.iq + 0.2 * b.oc
+	var I: float = (1.0 if role == RoleType.INITIATOR else 0.0) + 0.5 * b.oc + 0.25 * b.iq
+	var L: float = (1.0 if role == RoleType.LISTENER else 0.0) + 0.6 * b.inn + 0.4 * b.rf
+	var C: float = (1.0 if role == RoleType.CHALLENGER else 0.0) + 0.6 * b.iq + 0.2 * b.oc
+	var S: float = (1.0 if role == RoleType.SYNTHESIZER else 0.0) + 0.7 * b.rf + 0.4 * b.inn
+	var E: float = (1.0 if role == RoleType.EXPLORER else 0.0) + 0.7 * b.iq + 0.2 * b.oc
 
 	var r := ScoringResult.new()
 	r.b = b
@@ -69,5 +69,9 @@ static func score_turn(role: int, msg: String, partner_last: String, recent_toke
 	r.integration_xp = integration
 	r.depth_xp = depth
 	r.adaptability_xp = adaptability
-	r.I = I; r.L = L; r.C = C; r.S = S; r.E = E
+	r.I = I
+	r.L = L
+	r.C = C
+	r.S = S
+	r.E = E
 	return r

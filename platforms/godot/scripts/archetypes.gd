@@ -15,8 +15,8 @@ static func class_name_from(i: float, l: float, c: float, s: float, e: float) ->
 		elif k != top1 and v[k] > v[top2]:
 			top2 = k
 
-	var a := Core.keys()[top1]
-	var b := Core.keys()[top2]
+	var a: String = Core.keys()[top1]
+	var b: String = Core.keys()[top2]
 
 	if (a == "INITIATOR" and b == "EXPLORER") or (a == "EXPLORER" and b == "INITIATOR"):
 		return "Trailblazer"

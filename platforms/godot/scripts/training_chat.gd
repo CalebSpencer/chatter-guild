@@ -20,13 +20,21 @@ var ai_name := "CoachBot"
 var player_role := ScoringEngine.RoleType.INITIATOR
 var ai_role := ScoringEngine.RoleType.LISTENER
 
+var llm: LLMConnector
+var conversation_history: Array = []
+var _waiting_for_reply := false
+var _last_player_ip: int = 0
+
 func _ready() -> void:
-	randomize()
 	profile = SaveLoad.load_or_create()
 	report = SessionReport.new()
 
-	var class_name := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
-	header.text = "Level %d • Class: %s" % [profile.level, class_name]
+	llm = LLMConnector.new()
+	add_child(llm)
+	llm.reply_received.connect(_on_ai_reply)
+
+	var archetype_class := Archetypes.class_name_from(profile.initiator, profile.listener, profile.challenger, profile.synthesizer, profile.explorer)
+	header.text = "Level %d • Class: %s" % [profile.level, archetype_class]
 	footer.text = "Training Mode"
 
 	_add_system("Training Mode: have a conversation. End anytime to see your report.")
@@ -38,7 +46,8 @@ func _ready() -> void:
 
 func _on_send() -> void:
 	var text := input.text.strip_edges()
-	if text.is_empty(): return
+	if text.is_empty() or _waiting_for_reply:
+		return
 	input.text = ""
 
 	_add_message(player_name, text)
@@ -47,16 +56,33 @@ func _on_send() -> void:
 	report.add_turn(player_name, text, player_role, r1)
 	BehaviorHeuristics.update_recent_tokens(recent_tokens, text)
 	last_player = text
+	_last_player_ip = r1.ip
 
-	var reply := AIResponder.reply(ai_role, last_player)
+	conversation_history.append({"role": "user", "content": text})
+
+	_waiting_for_reply = true
+	send_btn.disabled = true
+	input.editable = false
+	footer.text = "AI is thinking..."
+
+	llm.request_reply(ai_role, last_player, conversation_history)
+
+func _on_ai_reply(reply: String) -> void:
+	_waiting_for_reply = false
+	send_btn.disabled = false
+	input.editable = true
+
 	_add_message(ai_name, reply)
+
+	conversation_history.append({"role": "assistant", "content": reply})
 
 	var r2 = ScoringEngine.score_turn(ai_role, reply, last_player, recent_tokens)
 	report.add_turn(ai_name, reply, ai_role, r2)
 	BehaviorHeuristics.update_recent_tokens(recent_tokens, reply)
 	last_ai = reply
 
-	footer.text = "Session IP: %d  •  You +%d IP" % [report.total_ip, r1.ip]
+	footer.text = "Session IP: %d  •  You +%d IP" % [report.total_ip, _last_player_ip]
+	input.grab_focus()
 
 func _on_end() -> void:
 	var v := report.archetype_vector()
@@ -66,7 +92,7 @@ func _on_end() -> void:
 	profile.blend_archetype(v["i"], v["l"], v["c"], v["s"], v["e"], 0.15)
 	SaveLoad.save(profile)
 
-	var cache := get_node("/root/SessionCache") as SessionCache
+	var cache := get_node("/root/SessionCache")
 	cache.last_report = report
 
 	get_tree().change_scene_to_file("res://scenes/report.tscn")
